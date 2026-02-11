@@ -1,0 +1,18 @@
+# virtual env
+.venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# streamlit cache
+.streamlit/
+
+# OS junk
+.DS_Store
+
+# data files (optional: comment out if you WANT to track csvs)
+data/monthly/
+
+# vscode
+.vscode/
