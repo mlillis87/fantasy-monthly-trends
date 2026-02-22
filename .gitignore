@@ -6,13 +6,13 @@ __pycache__/
 *.pyc
 
 # streamlit cache
-.streamlit/
+# .streamlit/
 
 # OS junk
 .DS_Store
 
 # data files (optional: comment out if you WANT to track csvs)
-data/monthly/
+# data/monthly/
 
 # vscode
 .vscode/
