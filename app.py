@@ -309,56 +309,103 @@ pa_chart = (
 
 if metric in df.columns and "PA" in df.columns:
     league_avg_metric = (
-    df[df["PA"] > 0]
+    df[df["Month"].isin(month_sort)]
+    .copy()
+)
+
+# rank hitters by PA within each month
+league_avg_metric["PA_rank"] = league_avg_metric.groupby("Month")["PA"].rank(
+    method="first", ascending=False
+)
+
+# keep top 200 hitters per month
+league_avg_metric = league_avg_metric[league_avg_metric["PA_rank"] <= 250]
+
+# PA-weighted average metric by month
+league_avg_metric = (
+    league_avg_metric
     .groupby("Month")
     .agg(
-        weighted_metric=(metric, lambda x: (x * df.loc[x.index, "PA"]).sum()),
-        total_pa=("PA", "sum")
+        weighted_metric=(metric, lambda x: (x * league_avg_metric.loc[x.index, "PA"]).sum()),
+        total_pa=("PA", "sum"),
     )
     .reset_index()
-    )
+)
 
-    league_avg_metric[metric] = (
-    league_avg_metric["weighted_metric"] /
-    league_avg_metric["total_pa"]
-    )
-    league_avg_metric = league_avg_metric[["Month", metric]]
+league_avg_metric[metric] = (
+    league_avg_metric["weighted_metric"] / league_avg_metric["total_pa"]
+)
 
-    avg_metric_line = (
-        alt.Chart(league_avg_metric)
-        .mark_line(
-            strokeDash=[6, 6],
-            color="#9CA3AF",
-            strokeWidth=2
-        )
-        .encode(
-            x=alt.X("Month:O", sort=month_sort),
-            y=alt.Y(f"{metric}:Q")
-        )
-    )
+league_avg_metric = league_avg_metric[["Month", metric]]
+league_avg_metric["Label"] = f"Avg {metric} (Top 250 hitters)"
 
-    metric_chart = metric_chart + avg_metric_line
+avg_metric_line = (
+    alt.Chart(league_avg_metric)
+    .mark_line(
+        strokeDash=[6, 6],
+        color="#9CA3AF",
+        strokeWidth=2
+    )
+    .encode(
+        x=alt.X("Month:O", sort=month_sort),
+        y=alt.Y(f"{metric}:Q"),
+        tooltip=[
+            alt.Tooltip("Label:N", title=""),
+            alt.Tooltip("Month:O", title="Month"),
+            alt.Tooltip(
+                f"{metric}:Q",
+                title=f"Avg {metric}",
+                format=".1%" if metric in ["BB%", "K%"] else ".3f",
+            ),
+        ]
+    )
+)
+
+metric_chart = metric_chart + avg_metric_line
 
 # --- League average PA (simple mean) ---
 
 league_avg_pa = (
-    df
+    df[df["Month"].isin(month_sort)]
+    .copy()
+)
+
+# rank players by PA within each month
+league_avg_pa["PA_rank"] = league_avg_pa.groupby("Month")["PA"].rank(
+    method="first", ascending=False
+)
+
+# keep top 150 hitters per month
+league_avg_pa = league_avg_pa[league_avg_pa["PA_rank"] <= 250]
+
+# compute average PA
+league_avg_pa = (
+    league_avg_pa
     .groupby("Month", as_index=False)["PA"]
     .mean()
 )
 
-full_time_line = alt.Chart(
-    pd.DataFrame({"Month": month_sort, "PA": [90]*len(month_sort)})
-).mark_line(
-    strokeDash=[6,6],
-    color="#9CA3AF",
-    strokeWidth=2
-).encode(
-    x="Month:O",
-    y="PA:Q"
+league_avg_pa["Label"] = "Avg PA (Top 250 hitters)"
+
+avg_pa_line = (
+    alt.Chart(league_avg_pa)
+    .mark_line(
+        strokeDash=[6, 6],
+        color="#9CA3AF",
+        strokeWidth=2
+    )
+    .encode(
+        x=alt.X("Month:O", sort=month_sort),
+        y=alt.Y("PA:Q"),
+        tooltip=[
+            alt.Tooltip("Label:N", title=""),
+            alt.Tooltip("Month:O", title="Month"),
+            alt.Tooltip("PA:Q", title="Avg PA"),
+        ]
+    )
 )
 
-pa_chart = pa_chart + full_time_line
+pa_chart = pa_chart + avg_pa_line
 
 
 st.subheader(f"{metric} by Month")
