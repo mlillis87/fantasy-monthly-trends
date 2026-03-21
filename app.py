@@ -319,7 +319,7 @@ league_avg_metric["PA_rank"] = league_avg_metric.groupby("Month")["PA"].rank(
 )
 
 # keep top 200 hitters per month
-league_avg_metric = league_avg_metric[league_avg_metric["PA_rank"] <= 250]
+league_avg_metric = league_avg_metric[league_avg_metric["PA_rank"] <= 270]
 
 # PA-weighted average metric by month
 league_avg_metric = (
@@ -337,7 +337,7 @@ league_avg_metric[metric] = (
 )
 
 league_avg_metric = league_avg_metric[["Month", metric]]
-league_avg_metric["Label"] = f"Avg {metric} (Top 250 hitters)"
+league_avg_metric["Label"] = f"Avg {metric} (Top 270 hitters)"
 
 avg_metric_line = (
     alt.Chart(league_avg_metric)
@@ -376,7 +376,7 @@ league_avg_pa["PA_rank"] = league_avg_pa.groupby("Month")["PA"].rank(
 )
 
 # keep top 150 hitters per month
-league_avg_pa = league_avg_pa[league_avg_pa["PA_rank"] <= 250]
+league_avg_pa = league_avg_pa[league_avg_pa["PA_rank"] <= 270]
 
 # compute average PA
 league_avg_pa = (
@@ -385,7 +385,7 @@ league_avg_pa = (
     .mean()
 )
 
-league_avg_pa["Label"] = "Avg PA (Top 250 hitters)"
+league_avg_pa["Label"] = "Avg PA (Top 270 hitters)"
 
 avg_pa_line = (
     alt.Chart(league_avg_pa)
